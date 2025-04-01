@@ -12,7 +12,7 @@ def main():
 
     client, addr = server_socket.accept()
     
-    client_msg = client.recv(4096).decode().split("")
+    client_msg = client.recv(4096).decode().split(" ")
     if client_msg[1] == "/":
        client.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
     else: 

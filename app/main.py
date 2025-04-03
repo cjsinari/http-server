@@ -12,7 +12,8 @@ def main():
         client, addr = server_socket.accept()
         print(f"Accepted connection from {addr}")
 
-        client_msg = client.recv(4096).decode().split(" ")
+        request_data = client.recv(4096).decode()
+        client_msg = request_data.split(" ")
         print(f"Received request: {client_msg}")  # Debugging output
 
         if len(client_msg) < 2:
@@ -32,17 +33,9 @@ def main():
 
         #Read user agent header
         elif request_path.startswith("/user-agent"):
-            headers = client.recv(4096).decode()
-            print(f"Received headers: {headers}")  #Debugging output
-
-            user_agent= "Unknown" #Default value
-            for line in headers.split("\r\n"):
-                if line.lower().startswith("user-agent:"):
-                    user_agent = line.split(": ", 1)[1] #Extract actual user-agent value
-                    break
-
-            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}" 
-            client.sendall(response.encode())
+          user_agent = next((line.split(": ", 1)[1] for line in request_data.split("\r\n") if line.lower().startswith("user-agent:")), "Unknown")             
+          response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}" 
+          client.sendall(response.encode())
 
         else:
             client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")

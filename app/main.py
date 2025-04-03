@@ -37,8 +37,8 @@ def main():
 
             user_agent= "Unknown" #Default value
             for line in headers.split("\r\n"):
-                if line.lower().startswith("user-agent"):
-                    user_agent = line.split(":", 1)[1] #Extract actual user-agent value
+                if line.lower().startswith("user-agent:"):
+                    user_agent = line.split(": ", 1)[1] #Extract actual user-agent value
                     break
 
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}" 

@@ -40,6 +40,8 @@ def main():
         else:
             client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 
+        #Establih concurrent connection    
+
         client.close()  # Close the connection after handling the request
 
 

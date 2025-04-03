@@ -32,7 +32,7 @@ def main():
 
         elif request_path.startswith("/user-agent"):
             user_agent = request_path[2]
-            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent=Length: {len(user_agent)}\r\n\r\n{user_agent}" 
+            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}" 
             client.sendall(response.encode())
 
         else:

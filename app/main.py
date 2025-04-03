@@ -15,6 +15,8 @@ def main():
     client_msg = client.recv(4096).decode().split(" ")
     if client_msg[1] == "/":
        client.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
+    elif client.startswith("/echo/")[1]:   
+       client.sendall(f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}".encode())
     else: 
         client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 

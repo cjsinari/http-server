@@ -30,9 +30,17 @@ def main():
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}"
             client.sendall(response.encode())
 
-        #Read header
+        #Read user agent header
         elif request_path.startswith("/user-agent"):
-            user_agent = 15
+            headers = client.recv(4096).decode()
+            print(f"Received headers: {headers}")  #Debugging output
+
+            user_agent= "Unknown" #Default value
+            for line in headers.split("\r\n"):
+                if line.lower().startswith("user-agent"):
+                    user_agent = line.split(":", 1)[1] #Extract actual user-agent value
+                    break
+
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}" 
             client.sendall(response.encode())
 

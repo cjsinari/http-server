@@ -5,13 +5,11 @@ def main():
 
     print("Logs from your program will appear here!")
 
-    
-    
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     server_socket.listen()
 
 while True: # Allow multiple connections
-    client, addr = server_socket.accept()
+    client, addr = server_socket.accept() # type: ignore
     print(f"Accepted connection from{addr}")
     
     client_msg = client.recv(4096).decode().split(" ")

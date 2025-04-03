@@ -24,10 +24,17 @@ def main():
 
         if request_path == "/":
             client.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
+
         elif request_path.startswith("/echo/"):
             value = request_path[6:]  # Extract text after "/echo/"
             response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}"
             client.sendall(response.encode())
+
+        elif request_path.startswith("/user-agent"):
+            user_agent = request_path[2]
+            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent=Length: {len(user_agent)}\r\n\r\n{user_agent}" 
+            client.sendall(response.encode())
+
         else:
             client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
 

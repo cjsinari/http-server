@@ -73,7 +73,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", required=True, help="Absolute path to the file directory")
     args = parser.parse_args()
-    FILES_DIRECTORY = "/tmp/files"
+    FILES_DIRECTORY = args.directory
 
     server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
     server_socket.listen()

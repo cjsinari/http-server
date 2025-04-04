@@ -46,7 +46,7 @@ def handle_client(client):
                         f"Content-Length: {len(content)}\r\n"
                         "\r\n"
                     )  
-                    client.sendall(response_headers.encode() +content)  
+                    client.sendall(response_headers.encode() + content)  
 
                 except Exception as e:
                     print(f"Error reading file:{e}")

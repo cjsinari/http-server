@@ -83,7 +83,6 @@ def main():
     while True:  # Allow multiple connections
         client, addr = server_socket.accept()
         print(f"Accepted connection from {addr}")
-
         #Create a new thread for each client request
         thread = threading.Thread(target=handle_client, args=(client,))
         thread.start()

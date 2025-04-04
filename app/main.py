@@ -1,25 +1,19 @@
 import socket  # noqa: F401
+import threading
 
 
-def main():
-
-    print("Logs from your program will appear here!")
-
-    server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
-    server_socket.listen()
-
-    while True:  # Allow multiple connections
-        client, addr = server_socket.accept()
-        print(f"Accepted connection from {addr}")
-
+def handle_client(client):
+    #Handles a single client request in a separate thread
+    try:
         request_data = client.recv(4096).decode()
         client_msg = request_data.split(" ")
         print(f"Received request: {client_msg}")  # Debugging output
 
+         
         if len(client_msg) < 2:
-            client.sendall(b"HTTP/1.1 400 Request Failed\r\n\r\n")
+            client.sendall(b"HTTP/1.1 400 Bad Request\r\n\r\n")
             client.close()
-            continue
+            return
 
         request_path = client_msg[1]
 
@@ -38,12 +32,31 @@ def main():
           client.sendall(response.encode())
 
         else:
-            client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+          client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+    
+    except Exception as e:
+        print(f"Error handling client: {e}")      
+    finally:
+        client.close()    
 
-        #Establih concurrent connection    
 
-        client.close()  # Close the connection after handling the request
+def main():
+
+    print("Logs from your program will appear here!")
+
+    server_socket = socket.create_server(("localhost", 4221), reuse_port=True)
+    server_socket.listen()
+    print ("Server is listening on port 4221...")
 
 
+    while True:  # Allow multiple connections
+        client, addr = server_socket.accept()
+        print(f"Accepted connection from {addr}")
+
+        #Create a new thread for each client request
+        thread = threading.Thread(target=handle_client, args=(client,))
+        thread.start()
+
+    
 if __name__ == "__main__":
     main()

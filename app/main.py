@@ -71,7 +71,7 @@ def main():
     
     #Parsing arguments to file directory to extract file
     parser = argparse.ArgumentParser()
-    parser.add_argument("--directory", required=True, help="Absolute path to the file directory")
+    parser.add_argument("--directory", required=False, default=".", help="Directory to serve files from")
     args = parser.parse_args()
     FILES_DIRECTORY = args.directory
 

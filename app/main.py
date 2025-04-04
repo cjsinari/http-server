@@ -36,6 +36,7 @@ def handle_client(client):
         elif request_path.startswith("/files/"):
             filename = request_path[len("/files/"):]
             filepath = os.path.join(FILES_DIRECTORY, filename)
+            print(f"Looking for file: {filepath}")
             if os.path.isfile(filepath):
                 try:
                     with open(filepath, "rb") as f:

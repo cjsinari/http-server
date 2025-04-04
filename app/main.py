@@ -33,7 +33,7 @@ def handle_client(client):
           client.sendall(response.encode())
 
         #Extracting file path from OS and reading Content-Length:
-        elif request_path.startwith("/files/"):
+        elif request_path.startswith("/files/"):
             filename = request_path[len("/files/"):]
             filepath = os.path.join(FILES_DIRECTORY, filename)
             if os.path.isfile(filepath):

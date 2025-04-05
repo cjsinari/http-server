@@ -15,6 +15,7 @@ def handle_client(client):
             client.sendall(b"HTTP/1.1 400 Bad Request\r\n\r\n")
             return
 
+        method = client_msg[0]
         request_path = client_msg[1]
 
         if request_path == "/":
@@ -35,9 +36,10 @@ def handle_client(client):
         elif request_path.startswith("/files/"):
             filename = request_path[len("/files/"):]
             filepath = os.path.join(FILES_DIRECTORY, filename)
-            print(f"Looking for file: {filepath}")
-            if os.path.isfile(filepath):
-                try:
+
+            if method == "GET":
+              print(f"Looking for file: {filepath}")
+              if os.path.isfile(filepath):
                     with open(filepath, "rb") as f:
                         content = f.read()
                     response_headers = (
@@ -46,14 +48,27 @@ def handle_client(client):
                         f"Content-Length: {len(content)}\r\n"
                         "\r\n"
                     )  
-                    client.sendall(response_headers.encode() + content)  
+                    client.sendall(response_headers.encode() + content) 
+                
+              else:
+                   client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+                
+                               
+            elif method == "POST":
+                # Split request manually to get body after \r\n\r\n
+                try:
+                    header_part, body = request_data.split("\r\n\r\n", 1)
+                    body_bytes = body.encode()
+                    with open(filepath, "wb") as f:
+                        f.write(body_bytes)
 
+                    client.sendall(b"HTTP/1.1 201 Created\r\n\r\n")
                 except Exception as e:
                     print(f"Error reading file:{e}")
                     client.sendall(b"HTTP/1.1 500 Internal Server Error\r\n\r\n")     
 
             else:
-              client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
+              client.sendall(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
 
         else:
             client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")     

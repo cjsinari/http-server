@@ -2,6 +2,8 @@ import socket  # noqa: F401
 import threading
 import argparse
 import os
+import gzip
+from io import BytesIO
 
 def handle_client(client):
     #Handles a single client request in a separate thread
@@ -17,14 +19,42 @@ def handle_client(client):
 
         method = client_msg[0]
         request_path = client_msg[1]
+        headers = request_data.split("\r\n")
 
+        #Extract Accept-Encoding header if present
+        accept_encoding = ""
+        for header in headers:
+            if header.lower().startswith("accept-encoding"):
+                accept_encoding = header.split(":", 1)[1].strip()
+                break
+
+             
         if request_path == "/":
             client.sendall(b"HTTP/1.1 200 OK\r\n\r\n")
 
         elif request_path.startswith("/echo/"):
             value = request_path[6:]  # Extract text after "/echo/"
-            response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}"
-            client.sendall(response.encode())
+            
+            #Searching for gzip in compression header
+            if "gzip" in accept_encoding:
+                out = BytesIO()
+                with gzip.GzipFile(fileobj=out, mode="wb") as f:
+                    f.write(value.encode())
+                compressed = out.getvalue()    
+                response =( 
+                 "HTTP/1.1 200 OK\r\n"
+                 "Content-Type: text/plain\r\n"
+                 f"Content-Encoding: gzip\r\n"
+                 f"Content-Length: {len(compressed)}\r\n"
+                 "\r\n"
+                ).encode() + compressed               
+                client.sendall(response)
+            
+            else:
+                response = (
+                    f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}"
+                )
+                client.sendall(response.encode())
 
         #Read user agent header
         elif request_path.startswith("/user-agent"):
@@ -52,8 +82,8 @@ def handle_client(client):
                 
               else:
                    client.sendall(b"HTTP/1.1 404 Not Found\r\n\r\n")
-                
-                               
+
+
             elif method == "POST":
                 # Split request manually to get body after \r\n\r\n
                 try:
@@ -64,7 +94,7 @@ def handle_client(client):
 
                     client.sendall(b"HTTP/1.1 201 Created\r\n\r\n")
                 except Exception as e:
-                    print(f"Error reading file:{e}")
+                    print(f"Error writing file:{e}")
                     client.sendall(b"HTTP/1.1 500 Internal Server Error\r\n\r\n")     
 
             else:
